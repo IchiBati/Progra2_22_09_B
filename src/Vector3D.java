@@ -89,25 +89,51 @@ public class Vector3D {
     }
 
     public static void writeToFile(File file, List<Vector3D> vectors) throws IOException, FileFormatException{
+
         if (file.exists()){
+
             hasValidFormat(file);
-            try(DataInputStream inputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
-               ){
 
-                   byte[] vec = inputStream.readNBytes(3);
-                   int numberOfVec = inputStream.readInt() + vectors.size();
-                   byte[] vecData = inputStream.readAllBytes();
+            byte[] vec = new byte[]{'V', 'E', 'C'};
+            int NumberOfVectors;
+            byte[] vectorContent;
 
-                    /**
-                   outputStream.write(vec);
-                   outputStream.writeInt(numberOfVec);
-                   outputStream.write(vecData);
-                   for (Vector3D vector : vectors){
-                       outputStream.writeFloat(vector.x);
-                       outputStream.writeFloat(vector.y);
-                       outputStream.writeFloat(vector.z);
-                   }**/
-               }
+            try(DataInputStream input = new DataInputStream(new FileInputStream(file))){
+
+                input.skipBytes(3);
+                NumberOfVectors = input.readInt() + vectors.size();
+                vectorContent = input.readAllBytes();
+
+            }
+
+            try(DataOutputStream output = new DataOutputStream( new FileOutputStream(file))) {
+                output.write(vec);
+                output.writeInt(NumberOfVectors);
+                output.write(vectorContent);
+
+                for (Vector3D vector : vectors) {
+                    output.writeFloat(vector.x);
+                    output.writeFloat(vector.y);
+                    output.writeFloat(vector.z);
+                }
+            }
+
+
+
+        }else {
+
+            try(DataOutputStream output = new DataOutputStream( new FileOutputStream(file));) {
+                output.write(new byte[]{'V', 'E', 'C'});
+                output.writeInt(vectors.size());
+
+                for (Vector3D vector : vectors) {
+                    output.writeFloat(vector.x);
+                    output.writeFloat(vector.y);
+                    output.writeFloat(vector.z);
+                }
+            }
+
+
 
         }
     }
